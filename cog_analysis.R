@@ -144,8 +144,47 @@ telenp_mcd_data <- ptnt.df[(ptnt.df$record_id %in% telenp_mcd_pts), ] # input Te
 
 # initialise a new df for analysis
 cog_mcd_data <- data.frame()
-cog_mcd_data <- telenp_mcd_data # input teleNP mcd data
 
-# match colnames in redcap_mcd_data with equivalents in telenp_mcd_data
-write.csv(telenp_mcd_data, "/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/fake/telenp.colnames.csv", row.names=FALSE)
-write.csv(redcap_mcd_data, "/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/fake/redcap.colnames.csv", row.names=FALSE)
+# rename columns in redcap_mcd_data to match with telenp_mcd_data
+# see /Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/fake/colnames.csv
+
+redcap_mcd_data <- redcap_mcd_data %>% rename(
+  gender = aepref_pt_sex, # requires re-defining values
+  ax.age.rough = npsyts_age_at_npsych_ax,
+  # RAVLT / word-list learning
+  wll.trial1.total = npsyts_ravlt_t1_raw_sc,
+  wll.trial2.total = npsyts_ravlt_t2_raw_sc,
+  wll.trial3.total = npsyts_ravlt_t3_raw_sc,
+  wll.total = npsyts_ravlt_t1_3_autocal,
+  wld.total = npsyts_ravlt_delay_raw_sc,
+  
+  # digit span
+  dsp.ldsf = npsyts_dsb_ldsf,
+  dsp.ldsb = npsyts_dsb_ldsb, 
+  
+  # oral SDMT
+  sdm.total.correct = npsyts_oral_sdmt_raw, 
+  
+  # COWAT / BHR
+  lf.B.valid = npsyts_cowat_b,
+  lf.H.valid = npsyts_cowat_h,
+  lf.R.valid = npsyts_cowat_r,
+  lf.total.valid = npsyts_bhr_total_raw,
+  
+  # animals / category fluency
+  cf.total.valid = npsyts_animals_raw_score,
+  
+  # confrontation naming
+  cnt.total.correct = npsyts_cnt_total
+)
+
+# re-define gender in redcap_mcd_data
+redcap_mcd_data$gender <- factor(redcap_mcd_data$gender,
+                          levels = c(1,2,3),
+                          labels = c("Male", "Female", "Other"))
+
+# make record_id the first col in telenp_mcd_data
+telenp_mcd_data <- telenp_mcd_data %>% relocate(record_id)
+
+#bind rows
+cog_mcd_data <- bind_rows(telenp_mcd_data, redcap_mcd_data)
