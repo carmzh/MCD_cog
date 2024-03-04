@@ -5,16 +5,15 @@ rm(list=ls())
 library(tidyverse)
 library(ggplot2)
 
-# import data----
-setwd("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/Study-1/data")
-data <- read.csv("AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-02-20_0953.csv")
+# Import data----
+mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-03-04_0919.csv")
 
-# data cleaning----
+# Data cleaning----
 ## remove meaningless columns
-data <- data[-c(2:4)] # removed redcap generated event indices
+mcd_data <- mcd_data[-c(2:4)] # removed redcap generated event indices
 
 ## rename columns
-data <- data %>%
+mcd_data <- mcd_data %>%
   rename(
     pt_sex = aepref_pt_sex,
     pt_age = npsyts_age_at_npsych_ax,
@@ -44,39 +43,39 @@ data <- data %>%
 
 # make categorical variables factors
 ## sex
-data$pt_sex <- factor(data$pt_sex,
+mcd_data$pt_sex <- factor(mcd_data$pt_sex,
                       levels = c(1,2,3),
                       labels = c("M", "F", "O"))
 
 ## referral category
-data$pt_ref <- factor(data$pt_ref,
+mcd_data$pt_ref <- factor(mcd_data$pt_ref,
                       levels = c(1,2,3),
                       labels = c("FUS", "New.Dx", "DRE"))
 
 ## imaging statuses
 ### abnormality
-data$pt_abnorm_status <- factor(data$pt_abnorm_status,
+mcd_data$pt_abnorm_status <- factor(mcd_data$pt_abnorm_status,
                                 levels = c(1,2,3),
                                 labels = c("normal", "abnormal", "incidental"))
 
 ### epileptogenic lesion
-data$pt_ep_lesn_status <- factor(data$pt_ep_lesn_status,
+mcd_data$pt_ep_lesn_status <- factor(mcd_data$pt_ep_lesn_status,
                                  levels = c(1,2,3),
                                  labels = c("yes", "no", "uncertain"))
 
 ### motion
-data$pt_motion_status <- factor(data$pt_motion_status,
+mcd_data$pt_motion_status <- factor(mcd_data$pt_motion_status,
                                 levels = c(1,2,3),
                                 labels = c("not.mentioned", "mild", "degraded"))
 
 ### repeat scan recommended
-data$pt_repeat_status <- factor(data$pt_repeat_status,
+mcd_data$pt_repeat_status <- factor(mcd_data$pt_repeat_status,
                                 levels = c(1,2),
                                 labels = c("yes", "no"))
 
-# descriptive stats----
+# Patient counts----
 # > create variable containing all unique id
-unique_id = unique(data$record_id)
+unique_id = unique(mcd_data$record_id)
 # > create variable containing all MCD columns
 mcd_types = c("MCD_BOSD",
               "MCD_FCD",
@@ -94,37 +93,59 @@ mcd_types = c("MCD_BOSD",
 
 ## identify patients with varying numbers of MCD
 ## > make a new column to store info on lesion count for each patient
-data$num_mcd = NaN
+mcd_data$num_mcd = NaN
 
 for (id in unique_id) {
   # pull the data for this record
-  t.record = which(data$record_id == id)
+  t.record = which(mcd_data$record_id == id)
   # get MCD columns for this patient
-  t.mcd.data = data[t.record, mcd_types] 
+  t.mcd.data = mcd_data[t.record, mcd_types] 
   if (rowSums(t.mcd.data, na.rm = TRUE) == 3) {
     # there are exactly three MCDs 
-    data[t.record, "num_mcd"] = 3
+    mcd_data[t.record, "num_mcd"] = 3
   } else if (rowSums(t.mcd.data, na.rm = TRUE) == 2) {
     # there are exactly two MCDs 
-    data[t.record, "num_mcd"] = 2
+    mcd_data[t.record, "num_mcd"] = 2
   } else if (rowSums(t.mcd.data, na.rm = TRUE) == 1) {
     # there is exactly one MCD 
-    data[t.record, "num_mcd"] = 1
+    mcd_data[t.record, "num_mcd"] = 1
   } else {
     # no relevant MCD identified
-    data[t.record, "num_mcd"] = 0
+    mcd_data[t.record, "num_mcd"] = 0
   }
 } 
 
 ## counts of people with varying numbers of MCD
-num_mcd <- factor(data$num_mcd, 
+num_mcd <- factor(mcd_data$num_mcd, 
                   levels = c(0,1,2,3))
 
-barplot(table(data$num_mcd),
-        xlab = "Number of MCD",
-        ylab = "Frequency")
+table(num_mcd)
 
+# Dataset merge ----
 # load in the TeleNP data
-telenp.data = load("/Users/carmen/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityofMelbourne/Chris Tailby - CogLab_Projects/AEP/R_files/AEPTeleNP_json_read/allPtntCtrlData.RData")
+telenp_data <- load("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/allPtntCtrlData.RData")
 
-# testing
+# find those mcd patients who are on TeleNP
+telenp_mcd_pts <- intersect(mcd_data$record_id, ptnt.df$record_id)
+# find those mcd patients who are not on TeleNp, therefore redcap_mcd_pts
+# redcap_mcd_pts <- setdiff(mcd_data$record_id, ptnt.df$record_id)
+
+# load in the redcap data of all mcd patients
+redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-03-04_1454.csv")
+# remove meaningless columns
+redcap_mcd_data <- redcap_mcd_data[-c(2:4)] # removed redcap generated event indices
+
+# make redcap_mcd_data contain npsych scores of only those not on TeleNP 
+redcap_mcd_data <- redcap_mcd_data[!(redcap_mcd_data$record_id %in% telenp_mcd_pts), ]
+
+# make telenp_mcd_data contain npsych scores of only those on TeleNP
+telenp_mcd_data <- data.frame() # initialise data frame
+telenp_mcd_data <- ptnt.df[(ptnt.df$record_id %in% telenp_mcd_pts), ] # input TeleNP data for only the MCD patients
+
+# initialise a new df for analysis
+cog_mcd_data <- data.frame()
+cog_mcd_data <- telenp_mcd_data # input teleNP mcd data
+
+# match colnames in redcap_mcd_data with equivalents in telenp_mcd_data
+write.csv(telenp_mcd_data, "/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/fake/telenp.colnames.csv", row.names=FALSE)
+write.csv(redcap_mcd_data, "/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/fake/redcap.colnames.csv", row.names=FALSE)
