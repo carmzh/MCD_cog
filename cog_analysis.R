@@ -1,4 +1,4 @@
-# this is the master R script which is used to obtain results for chapter 1 - 'cognitive features associated with MCD'
+# this is the master R script which is used to obtain results for analysing AEP cognitive data
 rm(list=ls())
 
 # libraries
