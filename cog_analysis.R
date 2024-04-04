@@ -188,3 +188,5 @@ telenp_mcd_data <- telenp_mcd_data %>% relocate(record_id)
 
 #bind rows
 cog_mcd_data <- bind_rows(telenp_mcd_data, redcap_mcd_data)
+
+
