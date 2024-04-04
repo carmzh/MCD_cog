@@ -405,3 +405,382 @@ tests_Age_at_Ax = df.cols[grep('Age_at_Ax',df.cols)]
 tests_Dur_at_Ax = df.cols[grep('Dur_at_Ax',df.cols)]
 tests_ASM_at_Ax = df.cols[grep('ASM_num',df.cols)]
 tests_Sz_freq_num = df.cols[grep('Sz_freq_num', df.cols)]
+
+# IC-CoDE (domain)----
+## language----
+# create variable for to include tests
+lang.cols.iccode = c("FAS_total_z", "BNT_z", "Animals_z")
+
+# make new column to indicate eligibility for cognitive phenotyping, ie. at least two tests
+init.data.iccode$eligibility.lang = NaN
+
+# how many participants' language domain were eligible for cognitive phenotyping?
+for (UR in unique_UR) {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get language tests for this participant
+  t.lang.data = init.data.iccode[t.record, lang.cols.iccode]
+  # get eligibility column for lang
+  t.eli.data = init.data.iccode[t.record, "eligibility.lang"]
+  
+  # if there are at least two language tests administered in this domain
+  if (length(which(!is.na(t.lang.data))) >=2) {
+    # the participant is eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.lang"] = 1
+  } else {
+    # the participant is not eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.lang"] = 0
+  }
+}
+
+n.lang.eligible = length(which(init.data.iccode[, "eligibility.lang"] == 1))
+print(n.lang.eligible)
+
+# how many were impaired in language domain (ie. impaired on at least two measures)?
+# make new column to store IC Code classification
+init.data.iccode$iccode.lang.2.imp = NaN
+init.data.iccode$iccode.lang.1.imp = NaN
+# define threshold considered impairment, in z units
+impairment.threshold = -1.5 
+ 
+for ( UR in unique_UR )  {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get language columns for this participant
+  t.lang.data = init.data.iccode[t.record,lang.cols.iccode]
+  if ( length(which(!is.na(t.lang.data))) >= 2 )  {
+    # there are at least two language tests
+    # check how many are impaired
+    if ( length(which(t.lang.data <= impairment.threshold)) >= 2 ) {
+      # impaired on two tests in the language domain
+      init.data.iccode[t.record,"iccode.lang.2.imp"] = 1
+      init.data.iccode[t.record,"iccode.lang.1.imp"] = 0
+    } else if ( length(which(t.lang.data <= impairment.threshold)) == 1 ) {
+      # impaired on one test in the language domain
+      init.data.iccode[t.record,"iccode.lang.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.lang.1.imp"] = 1
+    } else {
+      # not impaired on any language task administered
+      init.data.iccode[t.record,"iccode.lang.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.lang.1.imp"] = 0
+    }
+  }
+}
+
+n.lang.impaired = length(which(init.data.iccode[, "iccode.lang.2.imp"] ==1))
+print(n.lang.impaired)
+
+## memory----
+# create variable for to include tests
+mem.cols.iccode = c("RAVLT_1to5_z", "RAVLT_Delay_z", "VR1_z", "VR2_z", "LM1_z", "LM2_z", "RCF_Delay_z")
+
+# make new column to indicate eligibility for cognitive phenotyping, ie. at least two tests
+init.data.iccode$eligibility.mem = NaN
+
+# how many participants' memory domain were eligible for cognitive phenotyping?
+for (UR in unique_UR) {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get memory tests for this participant
+  t.mem.data = init.data.iccode[t.record, mem.cols.iccode]
+  # get eligibility column for mem
+  t.eli.data = init.data.iccode[t.record, "eligibility.mem"]
+  
+  # if there are at least two memory tests administered in this domain
+  if (length(which(!is.na(t.mem.data))) >=2) {
+    # the participant is eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.mem"] = 1
+  } else {
+    # the participant is not eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.mem"] = 0
+  }
+}
+
+n.mem.eligible = length(which(init.data.iccode[, "eligibility.mem"] == 1))
+print(n.mem.eligible)
+
+# how many were impaired in memory domain (ie. impaired on at least two measures)?
+# make new column to store IC Code classification
+init.data.iccode$iccode.mem.2.imp = NaN
+init.data.iccode$iccode.mem.1.imp = NaN
+# define threshold considered impairment, in z units
+impairment.threshold = -1.5 
+
+for ( UR in unique_UR )  {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get memory columns for this participant
+  t.mem.data = init.data.iccode[t.record,mem.cols.iccode]
+  if ( length(which(!is.na(t.mem.data))) >= 2 )  {
+    # there are at least two memory tests
+    # check how many are impaired
+    if ( length(which(t.mem.data <= impairment.threshold)) >= 2 ) {
+      # impaired on two tests in the memory domain
+      init.data.iccode[t.record,"iccode.mem.2.imp"] = 1
+      init.data.iccode[t.record,"iccode.mem.1.imp"] = 0
+    } else if ( length(which(t.mem.data <= impairment.threshold)) == 1 ) {
+      # impaired on one test in the memory domain
+      init.data.iccode[t.record,"iccode.mem.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.mem.1.imp"] = 1
+    } else {
+      # not impaired on any memory task administered
+      init.data.iccode[t.record,"iccode.mem.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.mem.1.imp"] = 0
+    }
+  }
+}
+
+n.mem.impaired = length(which(init.data.iccode[, "iccode.mem.2.imp"] ==1))
+print(n.mem.impaired)
+
+## executive function----
+# create variable for to include tests
+ef.cols.iccode = c("LN_z", "Arith_z", "Trails_B_z", "Stroop_C_z") 
+
+# make new column to indicate eligibility for cognitive phenotyping, ie. at least two tests
+init.data.iccode$eligibility.ef = NaN
+
+# how many participants' executive function domain were eligible for cognitive phenotyping?
+for (UR in unique_UR) {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get executive function tests for this participant
+  t.ef.data = init.data.iccode[t.record, ef.cols.iccode]
+  # get eligibility column for ef
+  t.eli.data = init.data.iccode[t.record, "eligibility.ef"]
+  
+  # if there are at least two executive function tests administered in this domain
+  if (length(which(!is.na(t.ef.data))) >=2) {
+    # the participant is eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.ef"] = 1
+  } else {
+    # the participant is not eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.ef"] = 0
+  }
+}
+
+n.ef.eligible = length(which(init.data.iccode[, "eligibility.ef"] == 1))
+print(n.ef.eligible)
+
+# how many were impaired in executive function domain (ie. impaired on at least two measures)?
+# make new column to store IC Code classification
+init.data.iccode$iccode.ef.2.imp = NaN
+init.data.iccode$iccode.ef.1.imp = NaN
+# define threshold considered impairment, in z units
+impairment.threshold = -1.5 
+
+for ( UR in unique_UR )  {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get executive function columns for this participant
+  t.ef.data = init.data.iccode[t.record,ef.cols.iccode]
+  if ( length(which(!is.na(t.ef.data))) >= 2 )  {
+    # there are at least two executive function tests
+    # check how many are impaired
+    if ( length(which(t.ef.data <= impairment.threshold)) >= 2 ) {
+      # impaired on two tests in the executive function domain
+      init.data.iccode[t.record,"iccode.ef.2.imp"] = 1
+      init.data.iccode[t.record,"iccode.ef.1.imp"] = 0
+    } else if ( length(which(t.ef.data <= impairment.threshold)) == 1 ) {
+      # impaired on one test in the executive function domain
+      init.data.iccode[t.record,"iccode.ef.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.ef.1.imp"] = 1
+    } else {
+      # not impaired on any executive function task administered
+      init.data.iccode[t.record,"iccode.ef.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.ef.1.imp"] = 0
+    }
+  }
+}
+
+n.ef.impaired = length(which(init.data.iccode[, "iccode.ef.2.imp"] ==1))
+print(n.ef.impaired)
+
+## attention/speed----
+# create variable for to include tests
+att.cols.iccode = c("DSCd_z", "Trails_A_z", "Dspan_z", "SS_z", "Cod_z", "Stroop_D_z", "Stroop_W_z") 
+
+# make new column to indicate eligibility for cognitive phenotyping, ie. at least two tests
+init.data.iccode$eligibility.att = NaN
+
+# how many participants' attention/speed domain were eligible for cognitive phenotyping?
+for (UR in unique_UR) {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get attention/speed tests for this participant
+  t.att.data = init.data.iccode[t.record, att.cols.iccode]
+  # get eligibility column for attention/speed
+  t.eli.data = init.data.iccode[t.record, "eligibility.att"]
+  
+  # if there are at least two attention/speed tests administered in this domain
+  if (length(which(!is.na(t.att.data))) >=2) {
+    # the participant is eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.att"] = 1
+  } else {
+    # the participant is not eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.att"] = 0
+  }
+}
+
+n.att.eligible = length(which(init.data.iccode[, "eligibility.att"] == 1))
+print(n.att.eligible)
+
+# how many were impaired in attention/speed domain (ie. impaired on at least two measures)?
+# make new column to store IC Code classification
+init.data.iccode$iccode.att.2.imp = NaN
+init.data.iccode$iccode.att.1.imp = NaN
+# define threshold considered impairment, in z units
+impairment.threshold = -1.5 
+
+for ( UR in unique_UR )  {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get attention/speed columns for this participant
+  t.att.data = init.data.iccode[t.record,att.cols.iccode]
+  if ( length(which(!is.na(t.att.data))) >= 2 )  {
+    # there are at least two attention/speed tests
+    # check how many are impaired
+    if ( length(which(t.att.data <= impairment.threshold)) >= 2 ) {
+      # impaired on two tests in the attention/speed domain
+      init.data.iccode[t.record,"iccode.att.2.imp"] = 1
+      init.data.iccode[t.record,"iccode.att.1.imp"] = 0
+    } else if ( length(which(t.att.data <= impairment.threshold)) == 1 ) {
+      # impaired on one test in the attention/speed domain
+      init.data.iccode[t.record,"iccode.att.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.att.1.imp"] = 1
+    } else {
+      # not impaired on any attention/speed task administered
+      init.data.iccode[t.record,"iccode.att.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.att.1.imp"] = 0
+    }
+  }
+}
+
+n.att.impaired = length(which(init.data.iccode[, "iccode.att.2.imp"] ==1))
+print(n.att.impaired)
+
+## visuospatial----
+# create variable for to include tests
+vis.cols.iccode = c("Pcomp_z", "MR_z", "BD_z", "RCF_Copy_z") 
+
+# make new column to indicate eligibility for cognitive phenotyping, ie. at least two tests
+init.data.iccode$eligibility.vis = NaN
+
+# how many participants' visuospatial domain were eligible for cognitive phenotyping?
+for (UR in unique_UR) {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get visuospatial tests for this participant
+  t.vis.data = init.data.iccode[t.record, vis.cols.iccode]
+  # get eligibility column for att
+  t.eli.data = init.data.iccode[t.record, "eligibility.vis"]
+  
+  # if there are at least two visuospatial tests administered in this domain
+  if (length(which(!is.na(t.vis.data))) >=2) {
+    # the participant is eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.vis"] = 1
+  } else {
+    # the participant is not eligible for cognitive phenotyping
+    init.data.iccode[t.record, "eligibility.vis"] = 0
+  }
+}
+
+n.vis.eligible = length(which(init.data.iccode[, "eligibility.vis"] == 1))
+print(n.vis.eligible)
+
+# how many were impaired in visuospatial domain (ie. impaired on at least two measures)?
+# make new column to store IC Code classification
+init.data.iccode$iccode.vis.2.imp = NaN
+init.data.iccode$iccode.vis.1.imp = NaN
+# define threshold considered impairment, in z units
+impairment.threshold = -1.5 
+
+for ( UR in unique_UR )  {
+  # pull the data for this record
+  t.record = which(init.data.iccode$UR == UR)
+  # get visuospatial columns for this participant
+  t.vis.data = init.data.iccode[t.record,vis.cols.iccode]
+  if ( length(which(!is.na(t.vis.data))) >= 2 )  {
+    # there are at least two visuospatial tests
+    # check how many are impaired
+    if ( length(which(t.vis.data <= impairment.threshold)) >= 2 ) {
+      # impaired on two tests in the visuospatial domain
+      init.data.iccode[t.record,"iccode.vis.2.imp"] = 1
+      init.data.iccode[t.record,"iccode.vis.1.imp"] = 0
+    } else if ( length(which(t.vis.data <= impairment.threshold)) == 1 ) {
+      # impaired on one test in the visuospatial domain
+      init.data.iccode[t.record,"iccode.vis.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.vis.1.imp"] = 1
+    } else {
+      # not impaired on any visuospatial task administered
+      init.data.iccode[t.record,"iccode.vis.2.imp"] = 0
+      init.data.iccode[t.record,"iccode.vis.1.imp"] = 0
+    }
+  }
+}
+
+n.vis.impaired = length(which(init.data.iccode[, "iccode.vis.2.imp"] ==1))
+print(n.vis.impaired)
+
+# IC-CoDE (phenotype)----
+# only people with at least four domains assessed are eligible for IC-CoDE phenotyping
+# number of impaired domains----
+imp.cols.iccocde = c( "iccode.lang.2.imp", "iccode.mem.2.imp", "iccode.exec.2.imp", "iccode.att.2.imp",  "iccode.vis.2.imp")
+
+# make new cols to store impairment category
+init.data.iccode$iccode.sing.imp = NaN
+init.data.iccode$iccode.bi.imp = NaN
+init.data.iccode$iccode.gen.imp = NaN
+init.data.iccode$iccode.nonimpaired = NaN
+
+# eligibility column
+init.data.iccode$eligibility.iccode = NaN
+
+for ( UR in unique_UR) {
+  # pull the data for this record
+  s.record = which(init.data.iccode$UR == UR)
+  # get impairment columns for this participant
+  s.imp.data = init.data.iccode[s.record,imp.cols.iccocde]
+  # get eligibility columns for this participant too
+  s.eli.data = init.data.iccode[s.record,"eligibility.iccode"]
+  
+  if (length(which(!is.na(s.imp.data))) < 4) {
+    # there are less than four domains measured
+    # the person is not eligible for IC-CoDE classification
+    init.data.iccode[s.record, "eligibility.iccode"] = 0
+    # all possible classification outcomes coded as NaN
+    init.data.iccode[s.record,"iccode.sing.imp"] = NaN
+    init.data.iccode[s.record,"iccode.bi.imp"] = NaN
+    init.data.iccode[s.record,"iccode.gen.imp"] = NaN
+    init.data.iccode[s.record,"iccode.nonimpaired"] = NaN
+  }
+  else if ( length(which(!is.na(s.imp.data))) >= 4) {
+    # there are at least four domains measured
+    init.data.iccode[s.record,"eligibility.iccode"] = 1
+    # check how many cases with at least three domains impaired (ie. gen)
+    if ( length(which(s.imp.data == 1)) >= 3) {
+      init.data.iccode[s.record,"iccode.sing.imp"] = 0
+      init.data.iccode[s.record,"iccode.bi.imp"] = 0
+      init.data.iccode[s.record,"iccode.gen.imp"] = 1
+      init.data.iccode[s.record,"iccode.nonimpaired"] = 0
+    } else if ( length(which(s.imp.data == 1)) == 2) {
+      # there are two impaired domains (ie. bi)
+      init.data.iccode[s.record,"iccode.sing.imp"] = 0
+      init.data.iccode[s.record,"iccode.bi.imp"] = 1
+      init.data.iccode[s.record,"iccode.gen.imp"] = 0
+      init.data.iccode[s.record,"iccode.nonimpaired"] = 0
+    } else if ( length(which(s.imp.data == 1)) == 1) {
+      # there is one impaired domain (ie. singular)
+      init.data.iccode[s.record,"iccode.sing.imp"] = 1
+      init.data.iccode[s.record,"iccode.bi.imp"] = 0
+      init.data.iccode[s.record,"iccode.gen.imp"] = 0
+      init.data.iccode[s.record,"iccode.nonimpaired"] = 0
+    } else if ( length(which(s.imp.data == 1)) == 0) {
+      # there is no impaired domain (ie. not impaired)
+      init.data.iccode[s.record,"iccode.sing.imp"] = 0
+      init.data.iccode[s.record,"iccode.bi.imp"] = 0
+      init.data.iccode[s.record,"iccode.gen.imp"] = 0
+      init.data.iccode[s.record,"iccode.nonimpaired"] = 1
+    } 
+  }
+}
