@@ -748,7 +748,7 @@ for (UR in unique_UR) {
   # get eligibility column for this participant too
   s.eli.data = init.data.iccode[s.record, eli.cols.iccode]
   
-  if (length(which(!is.na(eli.cols.iccode))) < 4) {
+  if (length(which(!is.na(s.eli.data))) < 4) {
     # there are less than four domains measured
     # the person is not eligible for IC-CoDE classification, coded as NaN
     init.data.iccode[s.record, "eligibility.pheno"] = NaN
@@ -758,7 +758,7 @@ for (UR in unique_UR) {
     init.data.iccode[s.record,"iccode.gen.imp"] = NaN
     init.data.iccode[s.record,"iccode.nonimpaired"] = NaN
   }
-  else if ( length(which(!is.na(eli.cols.iccode))) >= 4) {
+  else if (length(which(!is.na(s.eli.data))) >= 4) {
     # there are at least four domains measured
     init.data.iccode[s.record,"eligibility.pheno"] = 1
     # check how many cases with at least three domains impaired (ie. gen)
