@@ -789,5 +789,17 @@ for (UR in unique_UR) {
   }
 }
 
-n.eligible.pheno = which(init.data.iccode[, "eligibility.pheno"] == 1)
+n.eligible.pheno = length(which(init.data.iccode[, "eligibility.pheno"] == 1))
 print(n.eligible.pheno)
+# how many were generalised impaired?
+n.gen.imp = length(which(init.data.iccode[,"iccode.gen.imp"] == 1))
+print(n.gen.imp)
+# how many were bi impaired?
+n.bi.imp = length(which(init.data.iccode[, "iccode.bi.imp"] == 1))
+print(n.bi.imp)
+# how many were sing impaired?
+n.sing.imp = length(which(init.data.iccode[, "iccode.sing.imp"] == 1))
+print(n.sing.imp)
+# how many were not impaired?
+n.non.imp = length(which(init.data.iccode[, "iccode.nonimpaired"] == 1))
+print(n.non.imp)
