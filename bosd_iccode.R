@@ -429,7 +429,7 @@ for (UR in unique_UR) {
     init.data.iccode[t.record, "eligibility.lang"] = 1
   } else {
     # the participant is not eligible for cognitive phenotyping
-    init.data.iccode[t.record, "eligibility.lang"] = 0
+    init.data.iccode[t.record, "eligibility.lang"] = NaN
   }
 }
 
@@ -492,7 +492,7 @@ for (UR in unique_UR) {
     init.data.iccode[t.record, "eligibility.mem"] = 1
   } else {
     # the participant is not eligible for cognitive phenotyping
-    init.data.iccode[t.record, "eligibility.mem"] = 0
+    init.data.iccode[t.record, "eligibility.mem"] = NaN
   }
 }
 
@@ -555,7 +555,7 @@ for (UR in unique_UR) {
     init.data.iccode[t.record, "eligibility.ef"] = 1
   } else {
     # the participant is not eligible for cognitive phenotyping
-    init.data.iccode[t.record, "eligibility.ef"] = 0
+    init.data.iccode[t.record, "eligibility.ef"] = NaN
   }
 }
 
@@ -618,7 +618,7 @@ for (UR in unique_UR) {
     init.data.iccode[t.record, "eligibility.att"] = 1
   } else {
     # the participant is not eligible for cognitive phenotyping
-    init.data.iccode[t.record, "eligibility.att"] = 0
+    init.data.iccode[t.record, "eligibility.att"] = NaN
   }
 }
 
@@ -681,7 +681,7 @@ for (UR in unique_UR) {
     init.data.iccode[t.record, "eligibility.vis"] = 1
   } else {
     # the participant is not eligible for cognitive phenotyping
-    init.data.iccode[t.record, "eligibility.vis"] = 0
+    init.data.iccode[t.record, "eligibility.vis"] = NaN
   }
 }
 
@@ -724,8 +724,14 @@ print(n.vis.impaired)
 
 # IC-CoDE (phenotype)----
 # only people with at least four domains assessed are eligible for IC-CoDE phenotyping
-# number of impaired domains----
-imp.cols.iccocde = c( "iccode.lang.2.imp", "iccode.mem.2.imp", "iccode.exec.2.imp", "iccode.att.2.imp",  "iccode.vis.2.imp")
+# number of eligible domains
+eli.cols.iccode = c("eligibility.lang", "eligibility.mem", "eligibility.ef", "eligibility.att", "eligibility.vis")
+
+# number of impaired domain
+imp.cols.iccode = c("iccode.lang.2.imp", "iccode.mem.2.imp", "iccode.ef.2.imp", "iccode.att.2.imp",  "iccode.vis.2.imp")
+
+# column to indicate overall eligibility for phenotyping
+init.data.iccode$eligibility.pheno = NaN
 
 # make new cols to store impairment category
 init.data.iccode$iccode.sing.imp = NaN
@@ -733,30 +739,28 @@ init.data.iccode$iccode.bi.imp = NaN
 init.data.iccode$iccode.gen.imp = NaN
 init.data.iccode$iccode.nonimpaired = NaN
 
-# eligibility column
-init.data.iccode$eligibility.iccode = NaN
 
-for ( UR in unique_UR) {
+for (UR in unique_UR) {
   # pull the data for this record
   s.record = which(init.data.iccode$UR == UR)
   # get impairment columns for this participant
-  s.imp.data = init.data.iccode[s.record,imp.cols.iccocde]
-  # get eligibility columns for this participant too
-  s.eli.data = init.data.iccode[s.record,"eligibility.iccode"]
+  s.imp.data = init.data.iccode[s.record, imp.cols.iccode]
+  # get eligibility column for this participant too
+  s.eli.data = init.data.iccode[s.record, eli.cols.iccode]
   
-  if (length(which(!is.na(s.imp.data))) < 4) {
+  if (length(which(!is.na(eli.cols.iccode))) < 4) {
     # there are less than four domains measured
-    # the person is not eligible for IC-CoDE classification
-    init.data.iccode[s.record, "eligibility.iccode"] = 0
+    # the person is not eligible for IC-CoDE classification, coded as NaN
+    init.data.iccode[s.record, "eligibility.pheno"] = NaN
     # all possible classification outcomes coded as NaN
     init.data.iccode[s.record,"iccode.sing.imp"] = NaN
     init.data.iccode[s.record,"iccode.bi.imp"] = NaN
     init.data.iccode[s.record,"iccode.gen.imp"] = NaN
     init.data.iccode[s.record,"iccode.nonimpaired"] = NaN
   }
-  else if ( length(which(!is.na(s.imp.data))) >= 4) {
+  else if ( length(which(!is.na(eli.cols.iccode))) >= 4) {
     # there are at least four domains measured
-    init.data.iccode[s.record,"eligibility.iccode"] = 1
+    init.data.iccode[s.record,"eligibility.pheno"] = 1
     # check how many cases with at least three domains impaired (ie. gen)
     if ( length(which(s.imp.data == 1)) >= 3) {
       init.data.iccode[s.record,"iccode.sing.imp"] = 0
@@ -784,3 +788,6 @@ for ( UR in unique_UR) {
     } 
   }
 }
+
+n.eligible.pheno = which(init.data.iccode[, "eligibility.pheno"] == 1)
+print(n.eligible.pheno)
