@@ -803,3 +803,6 @@ print(n.sing.imp)
 # how many were not impaired?
 n.non.imp = length(which(init.data.iccode[, "iccode.nonimpaired"] == 1))
 print(n.non.imp)
+
+# code to check all the above work
+init.data.iccode[, c(eli.cols.iccode, "eligibility.pheno", imp.cols.iccode, "iccode.sing.imp", "iccode.bi.imp", "iccode.gen.imp", "iccode.nonimpaired")]
