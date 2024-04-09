@@ -1270,36 +1270,6 @@ median(post.minus.pre.asm.num,na.rm=TRUE)
 IQR(post.minus.pre.asm.num,na.rm=TRUE)
 min(post.minus.pre.asm.num,na.rm=TRUE)
 max(post.minus.pre.asm.num,na.rm=TRUE)
-# ##### increased
-# post.op.ASM.num.increase = which(rowMeans(had.surgery[, post_ASM_number],na.rm=TRUE) > rowMeans(had.surgery[, pre_ASM_number],na.rm=TRUE))
-# length(post.op.ASM.num.increase)
-# min(had.surgery[post.op.ASM.num.increase, post_ASM_number], na.rm = TRUE)
-# max(had.surgery[post.op.ASM.num.increase, post_ASM_number], na.rm = TRUE)
-# ##### decreased
-# post.op.ASM.num.decrease = which(rowMeans(had.surgery[, post_ASM_number],na.rm=TRUE) < rowMeans(had.surgery[, pre_ASM_number],na.rm=TRUE))
-# length(post.op.ASM.num.decrease)
-# min(had.surgery[post.op.ASM.num.decrease, post_ASM_number], na.rm = TRUE)
-# max(had.surgery[post.op.ASM.num.decrease, post_ASM_number], na.rm = TRUE)
-# ##### unchanged
-# post.op.ASM.num.unchanged = which(rowMeans(had.surgery[, post_ASM_number],na.rm=TRUE) == rowMeans(had.surgery[, pre_ASM_number],na.rm=TRUE))
-# length(post.op.ASM.num.unchanged)
-# min(had.surgery[post.op.ASM.num.unchanged, post_ASM_number], na.rm = TRUE)
-# max(had.surgery[post.op.ASM.num.unchanged, post_ASM_number], na.rm = TRUE)
-# ##### data NA to calculate change
-# # has.pre.post.ASM.nums
-# has.pre.post.ASM.nums = which(rowMeans(had.surgery[, post_ASM_number],na.rm=TRUE)>0 & rowMeans(had.surgery[, pre_ASM_number],na.rm=TRUE)>0)
-# length(has.pre.post.ASM.nums)
-# # not has pre.post.ASM nums
-# not.has.pre.post.ASM.nums = which(is.na(rowMeans(had.surgery[, post_ASM_number],na.rm=TRUE)) & is.na(rowMeans(had.surgery[, pre_ASM_number],na.rm=TRUE)))
-# length(not.has.pre.post.ASM.nums)
-# # not.has.pre.ASM.nums
-# not.has.pre.ASM.nums = which(is.na(rowMeans(had.surgery[, pre_ASM_number],na.rm=TRUE)))
-# length(not.has.pre.ASM.nums)
-# # not.has.post.ASM.nums
-# not.has.post.ASM.nums = which(is.na(rowMeans(had.surgery[, post_ASM_number],na.rm=TRUE)))
-# length(not.has.post.ASM.nums)
-# # unique count of not has.pre.post, pre. and post ASM nums
-# length(unique(c(not.has.pre.post.ASM.nums,not.has.pre.ASM.nums,not.has.post.ASM.nums)))
 
 #### Interval between pre- post-ax
 # calculate within subject mean first, then mean across subjects
@@ -1368,7 +1338,7 @@ min(rowMeans(not.had.surgery[,no.surg.ASM],na.rm=TRUE),na.rm=TRUE)
 max(rowMeans(not.had.surgery[,no.surg.ASM],na.rm=TRUE),na.rm=TRUE)
 
 
-## Fig: post-pre cog----
+## Post-pre cog----
 # find post minus pre cognitive score measures
 post.min.pre.cog = names(pre.post.data)[grep('post_min_pre.*_z', names(pre.post.data))]
 # don't include RCF copy
@@ -1388,8 +1358,10 @@ new.labels = gsub("_z","",new.labels)
 
 # get total number of pre- vs post-op comparisons
 length(which(!is.na(as.matrix(pre.post.data[,post.min.pre.cog]))))
+
 # and get number of change scores in excess of a 1.5 z-score unit decline
 length(which(as.matrix(pre.post.data[,post.min.pre.cog]) < -1.5))
+
 # get list of unique individuals and tests on which such a change observed
 sig.cog.change = which(as.matrix(pre.post.data[,post.min.pre.cog]) < -1.5,arr.ind = TRUE)
 pre.post.data[unique(sig.cog.change[,1]),c("UR","Lobe_of_BOSD","Hemisphere_BOSD")] # get list of unique individuals
@@ -1456,6 +1428,8 @@ pre.post.data[which(pre.post.data$post_min_pre_RCF_Delay_z < -1.5),
               c("UR","First_Name","Last_Name","Lobe_of_BOSD","Hemisphere_BOSD",
                 "pre_RCF_Delay_Date_of_Ax", "pre_RCF_Delay_z","post_RCF_Delay_Date_of_Ax", "post_RCF_Delay_z")]
 
+
+
 # obs: this was when RCF_copy_RS was included in tests_to_get while developing pre.post.data): 
 # RCF_copy RS normal pre-surgically, therefore drop in delay z-score likely due to memory dysfx
 
@@ -1482,9 +1456,13 @@ for ( this_test in tests_to_get ) {
   pre.post.data[which(pre.post.data[,diff.test.meds] == 0),diff.test.meds.qual] = "No change"
   # those with an increase
   pre.post.data[which(pre.post.data[,diff.test.meds] > 0),diff.test.meds.qual] = "Increased"
-  print(ggplot(data = pre.post.data[matched.test.inds,],aes(x = get(pre.test), y = get(post.test), color = get(diff.test.meds.qual))) + 
+  print(ggplot(data = pre.post.data[matched.test.inds,],
+               aes(x = get(pre.test), y = get(post.test), color = get(diff.test.meds.qual))) + 
           # geom_point(size = 3) + 
-          geom_jitter(size = 3, width = 0.1, height = 0.1) + # need this to reveal overlapping data points
+          geom_jitter(shape = 20, size = 5, width = 0.15, height = 0.1) + # need this to reveal overlapping data points
+          scale_color_manual(values = c("brown3", "coral",  "deepskyblue3", "lightgrey" )) + 
+          theme(panel.background = element_blank(),
+                panel.grid = element_line(size = 0.2, linetype = 2, color = "grey")) +
           geom_abline(slope = 1, intercept = 0) +
           ggtitle(print(this_test)) +
           labs(x = print(pre.test), y = print(post.test))
