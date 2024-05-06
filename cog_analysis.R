@@ -6,7 +6,7 @@ library(tidyverse)
 library(ggplot2)
 
 # Import data----
-mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-1/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-03-04_0919.csv")
+mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-06_1326.csv")
 
 # Data cleaning----
 ## remove meaningless columns
