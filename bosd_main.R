@@ -1459,7 +1459,7 @@ for ( this_test in tests_to_get ) {
   print(ggplot(data = pre.post.data[matched.test.inds,],
                aes(x = get(pre.test), y = get(post.test), color = get(diff.test.meds.qual))) + 
           # geom_point(size = 3) + 
-          geom_jitter(shape = 20, size = 5, width = 0.15, height = 0.1) + # need this to reveal overlapping data points
+          geom_jitter(shape = 20, size = 8, width = 0.15, height = 0.1) + # need this to reveal overlapping data points
           scale_color_manual(values = c("brown3", "coral",  "deepskyblue3", "lightgrey" )) + 
           theme(panel.background = element_blank(),
                 panel.grid = element_line(size = 0.2, linetype = 2, color = "grey")) +
