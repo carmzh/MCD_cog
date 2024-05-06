@@ -1,34 +1,52 @@
 ---
 title: "mcd_analysis"
-author: "CZ"
+author: "carmen zheng"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: true
 ---
 
-This is the master script for study 2 - analysis of TeleNP data for MCD patients in AEP
+This is the master script for **STUDY 2 - analysis of TeleNP data for MCD patients in AEP**
+
+```{r}
+rm(list=ls())
+```
 
 # Libraries  
 
-```{r echo=TRUE}
+```{r}
 library(tidyverse)
 library(ggplot2)
 ```
 
-# Load data  
+# Load data
 
 ```{r}
+# the patient characteristics data
 mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-06_1326.csv")
+
+# the TeleNP data
+telenp_data <- load("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/allPtntCtrlData.RData")
+
+# the REDCap npsych data of all MCD patients
+redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-05-06_1549.csv")
 ```
 
 # Data cleaning
 
-## Remove meaningless columns
+## For patient characeristics data:
+
+### Remove meaningless columns
 
 ```{r}
 mcd_data <- mcd_data[-c(2:4)] # remove redcap generated event indices
 ```
 
-## Rename columns
+### Rename columns
 
 ```{r}
 mcd_data <- mcd_data %>%
@@ -42,20 +60,204 @@ mcd_data <- mcd_data %>%
     pt_motion_status = mridat_mri_rad_motion_aff,
     pt_repeat_status = mridat_mri_rad_more_img,
     # MCD lesion types:
-    MCD_BOSD = mridat_rad_class_mcd___1,
-    MCD_FCD = mridat_rad_class_mcd___2,
-    MCD_tuber = mridat_rad_class_mcd___3,
-    MCD_GMH_PVNH = mridat_rad_class_mcd___4,
-    MCD_GMH_subnod = mridat_rad_class_mcd___5,
-    MCD_GMH_band = mridat_rad_class_mcd___6,
-    MCD_polymicrogyria = mridat_rad_class_mcd___7,
-    MCD_hh = mridat_rad_class_mcd___8,
-    MCD_meningocele = mridat_rad_class_mcd___9,
-    MCD_encephalocele = mridat_rad_class_mcd___10,
-    MCD_CC_dysgenesis = mridat_rad_class_mcd___11,
-    MCD_chiari = mridat_rad_class_mcd___12,
-    MCD_other = mridat_rad_class_mcd___13,
-    MCD_none = mridat_rad_class_mcd___14,
-    MCD_unknown = mridat_rad_class_mcd___15
+    MCD_BOSD = mridat_rad_class_mcd___1, # BOSD
+    MCD_FCD = mridat_rad_class_mcd___2, # FCD, not BOSD
+    MCD_tuber = mridat_rad_class_mcd___3, # tuberous sclerosis
+    MCD_GMH_PVNH = mridat_rad_class_mcd___4, # grey matter heterotopia - PVNH
+    MCD_GMH_subnod = mridat_rad_class_mcd___5, # grey matter heterotopia - subcortical nodular
+    MCD_GMH_band = mridat_rad_class_mcd___6, # grey matter heterotopia - band heterotopia
+    MCD_polymicrogyria = mridat_rad_class_mcd___7, # polymicrogyria
+    MCD_hh = mridat_rad_class_mcd___8, # hypothalamic hamartoma
+    MCD_meningocele = mridat_rad_class_mcd___9, # meningocele
+    MCD_encephalocele = mridat_rad_class_mcd___10, # encephalocele
+    MCD_CC_dysgenesis = mridat_rad_class_mcd___11, # corpus callosum - agenesis/dysgenesis
+    MCD_chiari = mridat_rad_class_mcd___12, # chiari malformation
+    MCD_other = mridat_rad_class_mcd___13, # other (schizencephaly, lissencephaly, hemimegalencephaly etc)
+    MCD_none = mridat_rad_class_mcd___14, # none
+    MCD_unknown = mridat_rad_class_mcd___15 # unknown
   )
+
 ```
+
+### Make categorical variables factors
+
+```{r echo=TRUE}
+# sex
+mcd_data$pt_sex <- factor(mcd_data$pt_sex,
+                      levels = c(1,2,3),
+                      labels = c("M", "F", "O"))
+
+# referral category
+mcd_data$pt_ref <- factor(mcd_data$pt_ref,
+                      levels = c(1,2,3),
+                      labels = c("FUS", "New.Dx", "DRE"))
+
+# imaging status - abnormality
+mcd_data$pt_abnorm_status <- factor(mcd_data$pt_abnorm_status,
+                                levels = c(1,2,3),
+                                labels = c("normal", "abnormal", "incidental"))
+
+# imaging status - epileptogenic lesion
+mcd_data$pt_ep_lesn_status <- factor(mcd_data$pt_ep_lesn_status,
+                                 levels = c(1,2,3),
+                                 labels = c("yes", "no", "uncertain"))
+
+# imaging status - motion
+mcd_data$pt_motion_status <- factor(mcd_data$pt_motion_status,
+                                levels = c(1,2,3),
+                                labels = c("not.mentioned", "mild", "degraded"))
+
+# imaging status - repeat scan recommended
+mcd_data$pt_repeat_status <- factor(mcd_data$pt_repeat_status,
+                                levels = c(1,2),
+                                labels = c("yes", "no"))
+
+head(mcd_data)
+```
+
+### Patient counts
+
+```{r}
+# create a variable containing all unique id
+unique_id = unique(mcd_data$record_id) 
+
+# create variable containing all MCD columns
+mcd_types = c("MCD_BOSD",
+              "MCD_FCD",
+              "MCD_tuber",
+              "MCD_GMH_PVNH",
+              "MCD_GMH_subnod",
+              "MCD_GMH_band",
+              "MCD_polymicrogyria",
+              "MCD_hh",
+              "MCD_meningocele",
+              "MCD_encephalocele",
+              "MCD_CC_dysgenesis",
+              "MCD_chiari",
+              "MCD_other") 
+
+# to identify pts with varying numbers of MCD, make a new column to store lesion count for each
+mcd_data$num_mcd = NaN 
+
+# for each id, if the sum of lesion is three/two/one/zero, code this numerical sum in colname = num_mcd
+for (id in unique_id) {
+  # pull the data for this record
+  t.record = which(mcd_data$record_id == id)
+  # get MCD columns for this patient
+  t.mcd.data = mcd_data[t.record, mcd_types] 
+  if (rowSums(t.mcd.data, na.rm = TRUE) == 6) {
+    # there are exactly six MCDs 
+    mcd_data[t.record, "num_mcd"] = 6
+  }
+  else if (rowSums(t.mcd.data, na.rm = TRUE) == 5) {
+    # there are exactly five MCDs 
+    mcd_data[t.record, "num_mcd"] = 5
+  }
+  else if (rowSums(t.mcd.data, na.rm = TRUE) == 4) {
+    # there are exactly four MCDs 
+    mcd_data[t.record, "num_mcd"] = 4
+  } else if (rowSums(t.mcd.data, na.rm = TRUE) == 3) {
+    # there are exactly three MCDs 
+    mcd_data[t.record, "num_mcd"] = 3
+  } else if (rowSums(t.mcd.data, na.rm = TRUE) == 2) {
+    # there are exactly two MCDs 
+    mcd_data[t.record, "num_mcd"] = 2
+  } else if (rowSums(t.mcd.data, na.rm = TRUE) == 1) {
+    # there is exactly one MCD 
+    mcd_data[t.record, "num_mcd"] = 1
+  } else {
+    # no relevant MCD identified
+    mcd_data[t.record, "num_mcd"] = 0
+  }
+} 
+
+num_mcd <- factor(mcd_data$num_mcd, 
+                  levels = c(0, 1, 2, 3, 4, 5, 6))
+table(num_mcd)
+
+```
+
+## for REDCap data:
+
+### Remove meaningless columns
+
+```{r}
+redcap_mcd_data <- redcap_mcd_data[-c(2:4)] # removed redcap generated event indices
+```
+
+
+### Rename columns
+
+```{r}
+# match columns common for both redcap_mcd_data and telenp_data
+redcap_mcd_data <- redcap_mcd_data %>% rename(
+  gender = aepref_pt_sex,
+  ax.age.rough = npsyts_age_at_npsych_ax,
+  # RAVLT / word-list learning
+  wll.trial1.total = npsyts_ravlt_t1_raw_sc,
+  wll.trial2.total = npsyts_ravlt_t2_raw_sc,
+  wll.trial3.total = npsyts_ravlt_t3_raw_sc,
+  wll.total = npsyts_ravlt_t1_3_autocal,
+  wld.total = npsyts_ravlt_delay_raw_sc,
+  
+  # digit span
+  dsp.ldsf = npsyts_dsb_ldsf,
+  dsp.ldsb = npsyts_dsb_ldsb, 
+  
+  # oral SDMT
+  sdm.total.correct = npsyts_oral_sdmt_raw, 
+  
+  # COWAT / BHR
+  lf.B.valid = npsyts_cowat_b,
+  lf.H.valid = npsyts_cowat_h,
+  lf.R.valid = npsyts_cowat_r,
+  lf.total.valid = npsyts_bhr_total_raw,
+  
+  # animals / category fluency
+  cf.total.valid = npsyts_animals_raw_score,
+  
+  # confrontation naming
+  cnt.total.correct = npsyts_cnt_total
+)
+```
+
+### Make categorical variables factors
+```{r}
+# re-define gender in redcap_mcd_data
+redcap_mcd_data$gender <- factor(redcap_mcd_data$gender,
+                                 levels = c(1,2,3),
+                                 labels = c("Male", "Female", "Other"))
+```
+
+# Merge REDCap and TeleNP data
+
+1. a list of MCD patients who are on TeleNP --- `telenp_mcd_pts`
+2. TeleNP scores of only MCD patients --- `telenp_mcd_data`
+3. npsych scores of only MCD patients not on TeleNP --- `redcap_mcd_data`
+    - hence rowsum of `telenp_mcd_data` and `redcap_mcd_data` = total sample size
+4. initialise new df to store `redcap_mcd_data` and `telenp_mcd_data` --- `cog_mcd_data`
+
+
+```{r}
+# find those record id of mcd patients who are on TeleNP
+telenp_mcd_pts <- intersect(mcd_data$record_id, ptnt.df$record_id)
+
+# make telenp_mcd_data contain npsych scores of only those on TeleNP
+telenp_mcd_data <- data.frame() # initialise data frame
+telenp_mcd_data <- ptnt.df[(ptnt.df$record_id %in% telenp_mcd_pts), ]
+
+# make record_id the first col in telenp_mcd_data
+telenp_mcd_data <- telenp_mcd_data %>% relocate(record_id)
+
+# make redcap_mcd_data contain npsych scores of only those not on TeleNP 
+redcap_mcd_data <- redcap_mcd_data[!(redcap_mcd_data$record_id %in% telenp_mcd_pts), ]
+
+# initialise a new df for analysis
+cog_mcd_data <- data.frame()
+cog_mcd_data <- bind_rows(telenp_mcd_data, redcap_mcd_data)
+```
+
+# To-do List
+
+- [x] Check what's up with the two people with no MCD lesions 
+  - it was because i didn't specify what happens when people have more than three MCDs
