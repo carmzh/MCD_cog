@@ -1,0 +1,61 @@
+---
+title: "mcd_analysis"
+author: "CZ"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+This is the master script for study 2 - analysis of TeleNP data for MCD patients in AEP
+
+# Libraries  
+
+```{r echo=TRUE}
+library(tidyverse)
+library(ggplot2)
+```
+
+# Load data  
+
+```{r}
+mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-06_1326.csv")
+```
+
+# Data cleaning
+
+## Remove meaningless columns
+
+```{r}
+mcd_data <- mcd_data[-c(2:4)] # remove redcap generated event indices
+```
+
+## Rename columns
+
+```{r}
+mcd_data <- mcd_data %>%
+  rename(
+    pt_sex = aepref_pt_sex,
+    pt_age = npsyts_age_at_npsych_ax,
+    pt_ref = aepref_pt_ref_cat, 
+    # imaging outcome classification status:
+    pt_abnorm_status = mridat_rad_rep_sum_class,
+    pt_ep_lesn_status = mridat_epileptogenic_lesn, 
+    pt_motion_status = mridat_mri_rad_motion_aff,
+    pt_repeat_status = mridat_mri_rad_more_img,
+    # MCD lesion types:
+    MCD_BOSD = mridat_rad_class_mcd___1,
+    MCD_FCD = mridat_rad_class_mcd___2,
+    MCD_tuber = mridat_rad_class_mcd___3,
+    MCD_GMH_PVNH = mridat_rad_class_mcd___4,
+    MCD_GMH_subnod = mridat_rad_class_mcd___5,
+    MCD_GMH_band = mridat_rad_class_mcd___6,
+    MCD_polymicrogyria = mridat_rad_class_mcd___7,
+    MCD_hh = mridat_rad_class_mcd___8,
+    MCD_meningocele = mridat_rad_class_mcd___9,
+    MCD_encephalocele = mridat_rad_class_mcd___10,
+    MCD_CC_dysgenesis = mridat_rad_class_mcd___11,
+    MCD_chiari = mridat_rad_class_mcd___12,
+    MCD_other = mridat_rad_class_mcd___13,
+    MCD_none = mridat_rad_class_mcd___14,
+    MCD_unknown = mridat_rad_class_mcd___15
+  )
+```
