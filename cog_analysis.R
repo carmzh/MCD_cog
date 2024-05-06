@@ -1,4 +1,4 @@
-# this is the master R script which is used to obtain results for analysing AEP cognitive data
+# this is the master R script used to obtain results for analysing AEP cognitive data - chapter 2
 rm(list=ls())
 
 # libraries
