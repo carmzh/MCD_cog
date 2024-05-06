@@ -257,7 +257,7 @@ cog_mcd_data <- data.frame()
 cog_mcd_data <- bind_rows(telenp_mcd_data, redcap_mcd_data)
 ```
 
-# To-do List
+# Troubleshoot
 
 - [x] Check what's up with the two people with no MCD lesions 
   - it was because i didn't specify what happens when people have more than three MCDs
