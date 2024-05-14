@@ -21,6 +21,7 @@ rm(list=ls())
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(pwr) # power analysis
 ```
 
 # Load data
@@ -139,7 +140,7 @@ mcd_types = c("MCD_BOSD",
 # to identify pts with varying numbers of MCD, make a new column to store lesion count for each
 mcd_data$num_mcd = NaN 
 
-# for each id, if the sum of lesion is three/two/one/zero, code this numerical sum in colname = num_mcd
+# for each id, if the sum of lesion is six/five/four/three/two/one/zero, code this numerical sum in colname = num_mcd
 for (id in unique_id) {
   # pull the data for this record
   t.record = which(mcd_data$record_id == id)
@@ -175,6 +176,9 @@ num_mcd <- factor(mcd_data$num_mcd,
                   levels = c(0, 1, 2, 3, 4, 5, 6))
 table(num_mcd)
 
+# count number of cases per each MCD in single-pathology cases
+single_path <- subset(mcd_data, mcd_data$num_mcd == 1)
+single_path %>% summarise(across(mcd_types, sum))
 ```
 
 ## for REDCap data:
@@ -255,6 +259,10 @@ redcap_mcd_data <- redcap_mcd_data[!(redcap_mcd_data$record_id %in% telenp_mcd_p
 # initialise a new df for analysis
 cog_mcd_data <- data.frame()
 cog_mcd_data <- bind_rows(telenp_mcd_data, redcap_mcd_data)
+```
+
+# Analysis
+## Power analysis
 ```
 
 # Troubleshoot

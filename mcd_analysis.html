@@ -11,7 +11,7 @@
 
 <meta name="author" content="carmen zheng" />
 
-<meta name="date" content="2024-05-06" />
+<meta name="date" content="2024-05-14" />
 
 <title>mcd_analysis</title>
 
@@ -1487,7 +1487,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">mcd_analysis</h1>
 <h4 class="author">carmen zheng</h4>
-<h4 class="date">2024-05-06</h4>
+<h4 class="date">2024-05-14</h4>
 
 </div>
 
@@ -1508,7 +1508,8 @@ data for MCD patients in AEP</strong></p>
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<pre class="r"><code>library(ggplot2)</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(pwr) # power analysis</code></pre>
 </div>
 <div id="load-data" class="section level1">
 <h1>Load data</h1>
@@ -1826,7 +1827,7 @@ mcd_types = c(&quot;MCD_BOSD&quot;,
 # to identify pts with varying numbers of MCD, make a new column to store lesion count for each
 mcd_data$num_mcd = NaN 
 
-# for each id, if the sum of lesion is three/two/one/zero, code this numerical sum in colname = num_mcd
+# for each id, if the sum of lesion is six/five/four/three/two/one/zero, code this numerical sum in colname = num_mcd
 for (id in unique_id) {
   # pull the data for this record
   t.record = which(mcd_data$record_id == id)
@@ -1864,6 +1865,27 @@ table(num_mcd)</code></pre>
 <pre><code>## num_mcd
 ##  0  1  2  3  4  5  6 
 ##  0 40 10  4  1  1  0</code></pre>
+<pre class="r"><code># count number of cases per each MCD in single-pathology cases
+single_path &lt;- subset(mcd_data, mcd_data$num_mcd == 1)
+single_path %&gt;% summarise(&quot;MCD_BOSD&quot;,
+                        &quot;MCD_FCD&quot;,
+                        &quot;MCD_tuber&quot;,
+                        &quot;MCD_GMH_PVNH&quot;,
+                        &quot;MCD_GMH_subnod&quot;,
+                        &quot;MCD_GMH_band&quot;,
+                        &quot;MCD_polymicrogyria&quot;,
+                        &quot;MCD_hh&quot;,
+                        &quot;MCD_meningocele&quot;,
+                        &quot;MCD_encephalocele&quot;,
+                        &quot;MCD_CC_dysgenesis&quot;,
+                        &quot;MCD_chiari&quot;,
+                        &quot;MCD_other&quot;)</code></pre>
+<pre><code>##   &quot;MCD_BOSD&quot; &quot;MCD_FCD&quot; &quot;MCD_tuber&quot; &quot;MCD_GMH_PVNH&quot; &quot;MCD_GMH_subnod&quot;
+## 1   MCD_BOSD   MCD_FCD   MCD_tuber   MCD_GMH_PVNH   MCD_GMH_subnod
+##   &quot;MCD_GMH_band&quot; &quot;MCD_polymicrogyria&quot; &quot;MCD_hh&quot; &quot;MCD_meningocele&quot;
+## 1   MCD_GMH_band   MCD_polymicrogyria   MCD_hh   MCD_meningocele
+##   &quot;MCD_encephalocele&quot; &quot;MCD_CC_dysgenesis&quot; &quot;MCD_chiari&quot; &quot;MCD_other&quot;
+## 1   MCD_encephalocele   MCD_CC_dysgenesis   MCD_chiari   MCD_other</code></pre>
 </div>
 </div>
 <div id="for-redcap-data" class="section level2">
@@ -1947,8 +1969,15 @@ redcap_mcd_data &lt;- redcap_mcd_data[!(redcap_mcd_data$record_id %in% telenp_mc
 cog_mcd_data &lt;- data.frame()
 cog_mcd_data &lt;- bind_rows(telenp_mcd_data, redcap_mcd_data)</code></pre>
 </div>
-<div id="to-do-list" class="section level1">
-<h1>To-do List</h1>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<div id="power-analysis" class="section level2">
+<h2>Power analysis</h2>
+<p>```</p>
+</div>
+</div>
+<div id="troubleshoot" class="section level1">
+<h1>Troubleshoot</h1>
 <ul class="task-list">
 <li><label><input type="checkbox" checked></input>Check what’s up with the
 two people with no MCD lesions</label>
