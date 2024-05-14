@@ -1514,13 +1514,13 @@ library(pwr) # power analysis</code></pre>
 <div id="load-data" class="section level1">
 <h1>Load data</h1>
 <pre class="r"><code># the patient characteristics data
-mcd_data = read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-06_1326.csv&quot;)
+mcd_data = read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-14_1100.csv&quot;)
 
 # the TeleNP data
 telenp_data &lt;- load(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/allPtntCtrlData.RData&quot;)
 
 # the REDCap npsych data of all MCD patients
-redcap_mcd_data &lt;- read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-05-06_1549.csv&quot;)</code></pre>
+redcap_mcd_data &lt;- read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-05-14_1102.csv&quot;)</code></pre>
 </div>
 <div id="data-cleaning" class="section level1">
 <h1>Data cleaning</h1>
@@ -1864,28 +1864,64 @@ num_mcd &lt;- factor(mcd_data$num_mcd,
 table(num_mcd)</code></pre>
 <pre><code>## num_mcd
 ##  0  1  2  3  4  5  6 
-##  0 40 10  4  1  1  0</code></pre>
+##  0 41 10  4  1  1  0</code></pre>
 <pre class="r"><code># count number of cases per each MCD in single-pathology cases
-single_path &lt;- subset(mcd_data, mcd_data$num_mcd == 1)
-single_path %&gt;% summarise(&quot;MCD_BOSD&quot;,
-                        &quot;MCD_FCD&quot;,
-                        &quot;MCD_tuber&quot;,
-                        &quot;MCD_GMH_PVNH&quot;,
-                        &quot;MCD_GMH_subnod&quot;,
-                        &quot;MCD_GMH_band&quot;,
-                        &quot;MCD_polymicrogyria&quot;,
-                        &quot;MCD_hh&quot;,
-                        &quot;MCD_meningocele&quot;,
-                        &quot;MCD_encephalocele&quot;,
-                        &quot;MCD_CC_dysgenesis&quot;,
-                        &quot;MCD_chiari&quot;,
-                        &quot;MCD_other&quot;)</code></pre>
-<pre><code>##   &quot;MCD_BOSD&quot; &quot;MCD_FCD&quot; &quot;MCD_tuber&quot; &quot;MCD_GMH_PVNH&quot; &quot;MCD_GMH_subnod&quot;
-## 1   MCD_BOSD   MCD_FCD   MCD_tuber   MCD_GMH_PVNH   MCD_GMH_subnod
-##   &quot;MCD_GMH_band&quot; &quot;MCD_polymicrogyria&quot; &quot;MCD_hh&quot; &quot;MCD_meningocele&quot;
-## 1   MCD_GMH_band   MCD_polymicrogyria   MCD_hh   MCD_meningocele
-##   &quot;MCD_encephalocele&quot; &quot;MCD_CC_dysgenesis&quot; &quot;MCD_chiari&quot; &quot;MCD_other&quot;
-## 1   MCD_encephalocele   MCD_CC_dysgenesis   MCD_chiari   MCD_other</code></pre>
+one_path &lt;- subset(mcd_data, mcd_data$num_mcd == 1)
+one_path %&gt;% summarise(across(mcd_types, sum))</code></pre>
+<pre><code>## Warning: There was 1 warning in `summarise()`.
+## ℹ In argument: `across(mcd_types, sum)`.
+## Caused by warning:
+## ! Using an external vector in selections was deprecated in tidyselect 1.1.0.
+## ℹ Please use `all_of()` or `any_of()` instead.
+##   # Was:
+##   data %&gt;% select(mcd_types)
+## 
+##   # Now:
+##   data %&gt;% select(all_of(mcd_types))
+## 
+## See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.</code></pre>
+<pre><code>##   MCD_BOSD MCD_FCD MCD_tuber MCD_GMH_PVNH MCD_GMH_subnod MCD_GMH_band
+## 1       16       7         1           11              2            0
+##   MCD_polymicrogyria MCD_hh MCD_meningocele MCD_encephalocele MCD_CC_dysgenesis
+## 1                  3      0               0                 0                 0
+##   MCD_chiari MCD_other
+## 1          0         1</code></pre>
+<pre class="r"><code># count number of cases per each MCD in dual-pathology cases
+two_path &lt;- subset(mcd_data, mcd_data$num_mcd == 2)
+two_path %&gt;% summarise(across(mcd_types, sum)) </code></pre>
+<pre><code>##   MCD_BOSD MCD_FCD MCD_tuber MCD_GMH_PVNH MCD_GMH_subnod MCD_GMH_band
+## 1        2       3         0            3              1            0
+##   MCD_polymicrogyria MCD_hh MCD_meningocele MCD_encephalocele MCD_CC_dysgenesis
+## 1                  3      0               2                 4                 0
+##   MCD_chiari MCD_other
+## 1          0         2</code></pre>
+<pre class="r"><code># count number of cases per each MCD in triple-pathology cases
+three_path &lt;- subset(mcd_data, mcd_data$num_mcd == 3)
+three_path %&gt;% summarise(across(mcd_types, sum)) </code></pre>
+<pre><code>##   MCD_BOSD MCD_FCD MCD_tuber MCD_GMH_PVNH MCD_GMH_subnod MCD_GMH_band
+## 1        1       1         0            1              0            1
+##   MCD_polymicrogyria MCD_hh MCD_meningocele MCD_encephalocele MCD_CC_dysgenesis
+## 1                  1      0               3                 3                 0
+##   MCD_chiari MCD_other
+## 1          0         1</code></pre>
+<pre class="r"><code># count number of cases per each MCD in quadruple-pathology cases
+four_path &lt;- subset(mcd_data, mcd_data$num_mcd == 4)
+four_path %&gt;% summarise(across(mcd_types, sum)) </code></pre>
+<pre><code>##   MCD_BOSD MCD_FCD MCD_tuber MCD_GMH_PVNH MCD_GMH_subnod MCD_GMH_band
+## 1        0       0         0            0              1            1
+##   MCD_polymicrogyria MCD_hh MCD_meningocele MCD_encephalocele MCD_CC_dysgenesis
+## 1                  1      0               0                 0                 0
+##   MCD_chiari MCD_other
+## 1          0         1</code></pre>
+<pre class="r"><code># count number of cases per each MCD in quintuple-pathology cases
+five_path &lt;- subset(mcd_data, mcd_data$num_mcd == 5)
+five_path %&gt;% summarise(across(mcd_types, sum)) </code></pre>
+<pre><code>##   MCD_BOSD MCD_FCD MCD_tuber MCD_GMH_PVNH MCD_GMH_subnod MCD_GMH_band
+## 1        0       0         0            0              0            0
+##   MCD_polymicrogyria MCD_hh MCD_meningocele MCD_encephalocele MCD_CC_dysgenesis
+## 1                  1      0               1                 1                 1
+##   MCD_chiari MCD_other
+## 1          0         1</code></pre>
 </div>
 </div>
 <div id="for-redcap-data" class="section level2">

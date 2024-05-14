@@ -28,13 +28,13 @@ library(pwr) # power analysis
 
 ```{r}
 # the patient characteristics data
-mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-06_1326.csv")
+mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-14_1100.csv")
 
 # the TeleNP data
 telenp_data <- load("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/allPtntCtrlData.RData")
 
 # the REDCap npsych data of all MCD patients
-redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-05-06_1549.csv")
+redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-05-14_1102.csv")
 ```
 
 # Data cleaning
@@ -177,8 +177,24 @@ num_mcd <- factor(mcd_data$num_mcd,
 table(num_mcd)
 
 # count number of cases per each MCD in single-pathology cases
-single_path <- subset(mcd_data, mcd_data$num_mcd == 1)
-single_path %>% summarise(across(mcd_types, sum))
+one_path <- subset(mcd_data, mcd_data$num_mcd == 1)
+one_path %>% summarise(across(mcd_types, sum))
+
+# count number of cases per each MCD in dual-pathology cases
+two_path <- subset(mcd_data, mcd_data$num_mcd == 2)
+two_path %>% summarise(across(mcd_types, sum)) 
+
+# count number of cases per each MCD in triple-pathology cases
+three_path <- subset(mcd_data, mcd_data$num_mcd == 3)
+three_path %>% summarise(across(mcd_types, sum)) 
+
+# count number of cases per each MCD in quadruple-pathology cases
+four_path <- subset(mcd_data, mcd_data$num_mcd == 4)
+four_path %>% summarise(across(mcd_types, sum)) 
+
+# count number of cases per each MCD in quintuple-pathology cases
+five_path <- subset(mcd_data, mcd_data$num_mcd == 5)
+five_path %>% summarise(across(mcd_types, sum)) 
 ```
 
 ## for REDCap data:
