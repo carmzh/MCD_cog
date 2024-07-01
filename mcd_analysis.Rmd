@@ -10,7 +10,7 @@ output:
       collapsed: true
 ---
 
-This is the master script for **STUDY 2 - analysis of TeleNP data for MCD patients in AEP**
+This is the master script for **STUDY 2 - analysis of cognitive data for MCD patients in AEP**
 
 ```{r}
 rm(list=ls())
@@ -28,29 +28,23 @@ library(pwr) # power analysis
 
 ```{r}
 # the patient characteristics data
-mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-14_1100.csv")
+mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-07-01_1350.csv")
 
 # the TeleNP data
 telenp_data <- load("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/allPtntCtrlData.RData")
 
 # the REDCap npsych data of all MCD patients
-redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-05-14_1102.csv")
+redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-07-01_1351.csv")
 ```
 
-# Data cleaning
-
-## For patient characeristics data:
-
-### Remove meaningless columns
+# Patient characeristics (all):
 
 ```{r}
-mcd_data <- mcd_data[-c(2:4)] # remove redcap generated event indices
-```
+# remove redcap generated event indices
+mcd_data <- mcd_data[-c(2:4)] 
 
-### Rename columns
-
-```{r}
-mcd_data <- mcd_data %>%
+# rename columns
+mcd_data <- mcd_data %>% 
   rename(
     pt_sex = aepref_pt_sex,
     pt_age = npsyts_age_at_npsych_ax,
@@ -78,11 +72,8 @@ mcd_data <- mcd_data %>%
     MCD_unknown = mridat_rad_class_mcd___15 # unknown
   )
 
-```
 
-### Make categorical variables factors
-
-```{r echo=TRUE}
+# Make categorical variables factors
 # sex
 mcd_data$pt_sex <- factor(mcd_data$pt_sex,
                       levels = c(1,2,3),
@@ -197,18 +188,11 @@ five_path <- subset(mcd_data, mcd_data$num_mcd == 5)
 five_path %>% summarise(across(mcd_types, sum)) 
 ```
 
-## for REDCap data:
-
-### Remove meaningless columns
+## set up REDCap npsych data
 
 ```{r}
-redcap_mcd_data <- redcap_mcd_data[-c(2:4)] # removed redcap generated event indices
-```
+redcap_mcd_data <- redcap_mcd_data[-c(2:4)] # removed rrededcap generated event indices
 
-
-### Rename columns
-
-```{r}
 # match columns common for both redcap_mcd_data and telenp_data
 redcap_mcd_data <- redcap_mcd_data %>% rename(
   gender = aepref_pt_sex,
@@ -239,17 +223,14 @@ redcap_mcd_data <- redcap_mcd_data %>% rename(
   # confrontation naming
   cnt.total.correct = npsyts_cnt_total
 )
-```
 
-### Make categorical variables factors
-```{r}
 # re-define gender in redcap_mcd_data
 redcap_mcd_data$gender <- factor(redcap_mcd_data$gender,
                                  levels = c(1,2,3),
                                  labels = c("Male", "Female", "Other"))
 ```
 
-# Merge REDCap and TeleNP data
+## Merge REDCap & TeleNP data
 
 1. a list of MCD patients who are on TeleNP --- `telenp_mcd_pts`
 2. TeleNP scores of only MCD patients --- `telenp_mcd_data`
@@ -278,7 +259,12 @@ cog_mcd_data <- bind_rows(telenp_mcd_data, redcap_mcd_data)
 ```
 
 # Analysis
-## Power analysis
+
+## RQ1 - single pathology associated with >=1 impaired cog domain
+
+```{r}
+# define cognitive domains by tests
+
 ```
 
 # Troubleshoot
