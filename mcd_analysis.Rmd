@@ -28,16 +28,16 @@ library(pwr) # power analysis
 
 ```{r}
 # the patient characteristics data
-mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-07-01_1350.csv")
+mcd_data = read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2-cog/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-08-02_1343.csv")
 
 # the TeleNP data
-telenp_data <- load("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/allPtntCtrlData.RData")
+telenp_data <- load("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2-cog/allPtntCtrlData.RData")
 
 # the REDCap npsych data of all MCD patients
-redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-07-01_1351.csv")
+redcap_mcd_data <- read.csv("/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2-cog/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-08-02_1343.csv")
 ```
 
-# Patient characeristics (all):
+# Patient characeristics:
 
 ```{r}
 # remove redcap generated event indices
@@ -61,7 +61,7 @@ mcd_data <- mcd_data %>%
     MCD_GMH_PVNH = mridat_rad_class_mcd___4, # grey matter heterotopia - PVNH
     MCD_GMH_subnod = mridat_rad_class_mcd___5, # grey matter heterotopia - subcortical nodular
     MCD_GMH_band = mridat_rad_class_mcd___6, # grey matter heterotopia - band heterotopia
-    MCD_polymicrogyria = mridat_rad_class_mcd___7, # polymicrogyria
+    MCD_PMG = mridat_rad_class_mcd___7, # polymicrogyria
     MCD_hh = mridat_rad_class_mcd___8, # hypothalamic hamartoma
     MCD_meningocele = mridat_rad_class_mcd___9, # meningocele
     MCD_encephalocele = mridat_rad_class_mcd___10, # encephalocele
@@ -107,7 +107,7 @@ mcd_data$pt_repeat_status <- factor(mcd_data$pt_repeat_status,
 head(mcd_data)
 ```
 
-### Patient counts
+### lesion frequencies
 
 ```{r}
 # create a variable containing all unique id
@@ -120,13 +120,15 @@ mcd_types = c("MCD_BOSD",
               "MCD_GMH_PVNH",
               "MCD_GMH_subnod",
               "MCD_GMH_band",
-              "MCD_polymicrogyria",
+              "MCD_PMG",
               "MCD_hh",
               "MCD_meningocele",
               "MCD_encephalocele",
               "MCD_CC_dysgenesis",
               "MCD_chiari",
               "MCD_other") 
+
+
 
 # to identify pts with varying numbers of MCD, make a new column to store lesion count for each
 mcd_data$num_mcd = NaN 
@@ -188,10 +190,10 @@ five_path <- subset(mcd_data, mcd_data$num_mcd == 5)
 five_path %>% summarise(across(mcd_types, sum)) 
 ```
 
-## set up REDCap npsych data
+set up REDCap data
 
 ```{r}
-redcap_mcd_data <- redcap_mcd_data[-c(2:4)] # removed rrededcap generated event indices
+redcap_mcd_data <- redcap_mcd_data[-c(2:4)] # removed redcap generated event indices
 
 # match columns common for both redcap_mcd_data and telenp_data
 redcap_mcd_data <- redcap_mcd_data %>% rename(
@@ -230,7 +232,7 @@ redcap_mcd_data$gender <- factor(redcap_mcd_data$gender,
                                  labels = c("Male", "Female", "Other"))
 ```
 
-## Merge REDCap & TeleNP data
+## merge REDCap & TeleNP data
 
 1. a list of MCD patients who are on TeleNP --- `telenp_mcd_pts`
 2. TeleNP scores of only MCD patients --- `telenp_mcd_data`
@@ -256,14 +258,16 @@ redcap_mcd_data <- redcap_mcd_data[!(redcap_mcd_data$record_id %in% telenp_mcd_p
 # initialise a new df for analysis
 cog_mcd_data <- data.frame()
 cog_mcd_data <- bind_rows(telenp_mcd_data, redcap_mcd_data)
+
+nrow(cog_mcd_data)
 ```
 
-# Analysis
+# Data compression
 
-## RQ1 - single pathology associated with >=1 impaired cog domain
+## CFA
 
 ```{r}
-# define cognitive domains by tests
+# [come back here]
 
 ```
 

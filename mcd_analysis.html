@@ -11,7 +11,7 @@
 
 <meta name="author" content="carmen zheng" />
 
-<meta name="date" content="2024-05-14" />
+<meta name="date" content="2024-07-01" />
 
 <title>mcd_analysis</title>
 
@@ -1487,12 +1487,12 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">mcd_analysis</h1>
 <h4 class="author">carmen zheng</h4>
-<h4 class="date">2024-05-14</h4>
+<h4 class="date">2024-07-01</h4>
 
 </div>
 
 
-<p>This is the master script for <strong>STUDY 2 - analysis of TeleNP
+<p>This is the master script for <strong>STUDY 2 - analysis of cognitive
 data for MCD patients in AEP</strong></p>
 <pre class="r"><code>rm(list=ls())</code></pre>
 <div id="libraries" class="section level1">
@@ -1514,25 +1514,21 @@ library(pwr) # power analysis</code></pre>
 <div id="load-data" class="section level1">
 <h1>Load data</h1>
 <pre class="r"><code># the patient characteristics data
-mcd_data = read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-05-14_1100.csv&quot;)
+mcd_data = read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientCharacteri_DATA_2024-07-01_1414.csv&quot;)
 
 # the TeleNP data
 telenp_data &lt;- load(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/allPtntCtrlData.RData&quot;)
 
 # the REDCap npsych data of all MCD patients
-redcap_mcd_data &lt;- read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-05-14_1102.csv&quot;)</code></pre>
+redcap_mcd_data &lt;- read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/PhD/data/study-2/AustralianEpilepsyPr-MCDPatientsNpsychSco_DATA_2024-07-01_1417.csv&quot;)</code></pre>
 </div>
-<div id="data-cleaning" class="section level1">
-<h1>Data cleaning</h1>
-<div id="for-patient-characeristics-data" class="section level2">
-<h2>For patient characeristics data:</h2>
-<div id="remove-meaningless-columns" class="section level3">
-<h3>Remove meaningless columns</h3>
-<pre class="r"><code>mcd_data &lt;- mcd_data[-c(2:4)] # remove redcap generated event indices</code></pre>
-</div>
-<div id="rename-columns" class="section level3">
-<h3>Rename columns</h3>
-<pre class="r"><code>mcd_data &lt;- mcd_data %&gt;%
+<div id="patient-characeristics-all" class="section level1">
+<h1>Patient characeristics (all):</h1>
+<pre class="r"><code># remove redcap generated event indices
+mcd_data &lt;- mcd_data[-c(2:4)] 
+
+# rename columns
+mcd_data &lt;- mcd_data %&gt;% 
   rename(
     pt_sex = aepref_pt_sex,
     pt_age = npsyts_age_at_npsych_ax,
@@ -1558,11 +1554,11 @@ redcap_mcd_data &lt;- read.csv(&quot;/Users/carmen/Library/CloudStorage/OneDrive
     MCD_other = mridat_rad_class_mcd___13, # other (schizencephaly, lissencephaly, hemimegalencephaly etc)
     MCD_none = mridat_rad_class_mcd___14, # none
     MCD_unknown = mridat_rad_class_mcd___15 # unknown
-  )</code></pre>
-</div>
-<div id="make-categorical-variables-factors" class="section level3">
-<h3>Make categorical variables factors</h3>
-<pre class="r"><code># sex
+  )
+
+
+# Make categorical variables factors
+# sex
 mcd_data$pt_sex &lt;- factor(mcd_data$pt_sex,
                       levels = c(1,2,3),
                       labels = c(&quot;M&quot;, &quot;F&quot;, &quot;O&quot;))
@@ -1803,7 +1799,6 @@ head(mcd_data)</code></pre>
 ## 4                          0                        NA
 ## 5                          0                        NA
 ## 6                          0                        NA</code></pre>
-</div>
 <div id="patient-counts" class="section level3">
 <h3>Patient counts</h3>
 <pre class="r"><code># create a variable containing all unique id
@@ -1823,6 +1818,9 @@ mcd_types = c(&quot;MCD_BOSD&quot;,
               &quot;MCD_CC_dysgenesis&quot;,
               &quot;MCD_chiari&quot;,
               &quot;MCD_other&quot;) 
+
+# exclude the following MCDs
+
 
 # to identify pts with varying numbers of MCD, make a new column to store lesion count for each
 mcd_data$num_mcd = NaN 
@@ -1864,7 +1862,7 @@ num_mcd &lt;- factor(mcd_data$num_mcd,
 table(num_mcd)</code></pre>
 <pre><code>## num_mcd
 ##  0  1  2  3  4  5  6 
-##  0 41 10  4  1  1  0</code></pre>
+##  0 43 11  4  1  1  0</code></pre>
 <pre class="r"><code># count number of cases per each MCD in single-pathology cases
 one_path &lt;- subset(mcd_data, mcd_data$num_mcd == 1)
 one_path %&gt;% summarise(across(mcd_types, sum))</code></pre>
@@ -1881,7 +1879,7 @@ one_path %&gt;% summarise(across(mcd_types, sum))</code></pre>
 ## 
 ## See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.</code></pre>
 <pre><code>##   MCD_BOSD MCD_FCD MCD_tuber MCD_GMH_PVNH MCD_GMH_subnod MCD_GMH_band
-## 1       16       7         1           11              2            0
+## 1       18       7         0           12              2            0
 ##   MCD_polymicrogyria MCD_hh MCD_meningocele MCD_encephalocele MCD_CC_dysgenesis
 ## 1                  3      0               0                 0                 0
 ##   MCD_chiari MCD_other
@@ -1890,7 +1888,7 @@ one_path %&gt;% summarise(across(mcd_types, sum))</code></pre>
 two_path &lt;- subset(mcd_data, mcd_data$num_mcd == 2)
 two_path %&gt;% summarise(across(mcd_types, sum)) </code></pre>
 <pre><code>##   MCD_BOSD MCD_FCD MCD_tuber MCD_GMH_PVNH MCD_GMH_subnod MCD_GMH_band
-## 1        2       3         0            3              1            0
+## 1        2       3         0            4              1            1
 ##   MCD_polymicrogyria MCD_hh MCD_meningocele MCD_encephalocele MCD_CC_dysgenesis
 ## 1                  3      0               2                 4                 0
 ##   MCD_chiari MCD_other
@@ -1923,16 +1921,11 @@ five_path %&gt;% summarise(across(mcd_types, sum)) </code></pre>
 ##   MCD_chiari MCD_other
 ## 1          0         1</code></pre>
 </div>
-</div>
-<div id="for-redcap-data" class="section level2">
-<h2>for REDCap data:</h2>
-<div id="remove-meaningless-columns-1" class="section level3">
-<h3>Remove meaningless columns</h3>
-<pre class="r"><code>redcap_mcd_data &lt;- redcap_mcd_data[-c(2:4)] # removed redcap generated event indices</code></pre>
-</div>
-<div id="rename-columns-1" class="section level3">
-<h3>Rename columns</h3>
-<pre class="r"><code># match columns common for both redcap_mcd_data and telenp_data
+<div id="set-up-redcap-npsych-data" class="section level2">
+<h2>set up REDCap npsych data</h2>
+<pre class="r"><code>redcap_mcd_data &lt;- redcap_mcd_data[-c(2:4)] # removed rrededcap generated event indices
+
+# match columns common for both redcap_mcd_data and telenp_data
 redcap_mcd_data &lt;- redcap_mcd_data %&gt;% rename(
   gender = aepref_pt_sex,
   ax.age.rough = npsyts_age_at_npsych_ax,
@@ -1961,19 +1954,15 @@ redcap_mcd_data &lt;- redcap_mcd_data %&gt;% rename(
   
   # confrontation naming
   cnt.total.correct = npsyts_cnt_total
-)</code></pre>
-</div>
-<div id="make-categorical-variables-factors-1" class="section level3">
-<h3>Make categorical variables factors</h3>
-<pre class="r"><code># re-define gender in redcap_mcd_data
+)
+
+# re-define gender in redcap_mcd_data
 redcap_mcd_data$gender &lt;- factor(redcap_mcd_data$gender,
                                  levels = c(1,2,3),
                                  labels = c(&quot;Male&quot;, &quot;Female&quot;, &quot;Other&quot;))</code></pre>
 </div>
-</div>
-</div>
-<div id="merge-redcap-and-telenp-data" class="section level1">
-<h1>Merge REDCap and TeleNP data</h1>
+<div id="merge-redcap-telenp-data" class="section level2">
+<h2>Merge REDCap &amp; TeleNP data</h2>
 <ol style="list-style-type: decimal">
 <li>a list of MCD patients who are on TeleNP —
 <code>telenp_mcd_pts</code></li>
@@ -2005,11 +1994,13 @@ redcap_mcd_data &lt;- redcap_mcd_data[!(redcap_mcd_data$record_id %in% telenp_mc
 cog_mcd_data &lt;- data.frame()
 cog_mcd_data &lt;- bind_rows(telenp_mcd_data, redcap_mcd_data)</code></pre>
 </div>
+</div>
 <div id="analysis" class="section level1">
 <h1>Analysis</h1>
-<div id="power-analysis" class="section level2">
-<h2>Power analysis</h2>
-<p>```</p>
+<div id="rq1---single-pathology-associated-with-1-impaired-cog-domain" class="section level2">
+<h2>RQ1 - single pathology associated with &gt;=1 impaired cog
+domain</h2>
+<pre class="r"><code># define cognitive domains by tests</code></pre>
 </div>
 </div>
 <div id="troubleshoot" class="section level1">
